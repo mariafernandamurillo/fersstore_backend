@@ -1,0 +1,78 @@
+# create a virtual env
+python3 -m venv venv
+pypy
+
+# activate the venv
+
+win: venv\Scripts\activate
+
+mac: source venv/bin/activate
+
+
+#Install flask 
+
+win: py -m pip install flask
+
+mac: python3 -m pip install flask
+
+# An API 
+a set of functions and procedures allowing the creation of applications that access the features or data of an operating system, application, or other service.
+
+#Collections 
+Type of variables.
+
+--------------
+One of them are Lists.
+A list in pythonis like an array in js.
+    mylis = ["apple", "banana"]
+Lists are:  
+    Ordered.
+    Changable.
+    Allow duplicates.
+    Starts at 0.
+
+--------------
+
+Dictionary 
+
+Starts with {} like a js object literal
+thisdict = {
+    "brand" : "somethin",
+     ...
+}
+
+Dictionaries are:   
+    Orderder 
+    Changable
+    Does not allows duplicates 
+    Access by Key 
+
+///////////////////////GIT/////////////////
+1. Git is the technology. Is a version control system.
+2. GitHub is just the space.
+
+
+----- New Project ---------
+# initialize the Repo
+git init
+
+# create local snapshot
+git add .
+git commit -m "Somethig"
+
+# setup the remote url
+git remote add origin <URL>
+
+# upload to server
+git push -u origin main
+
+
+----- Subsequent push ------
+git add .
+git commit -m  "Something"
+
+git push
+
+----- Mongo DB ---------
+username: fersstore
+pass: Fersstore101

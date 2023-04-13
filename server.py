@@ -1,11 +1,15 @@
-from flask import Flask, request
+from flask import Flask, abort, request
 #from this tool (from flask ) import this class (import Flask )
 #This allow us (request) to make a reques in the post method
+#This allos us (abort) to return an error (api/catalog/<code>)
 
 import json 
 
 from about import me #importing my dictionary
 from data import mock_data
+
+#To allow different URL betwen the backend and the frontend
+from flask_cors import CORS
 
 #After create a client in config.py, we import de db
 #From the file config
@@ -13,6 +17,8 @@ from  config import db
 
 #Create an instance of Flask class -> app = Flask() 
 app = Flask(__name__) #Magic variables __name__
+
+CORS(app)#WARNING: Disable CORS check
 
 #WEB SERVER
 #To show something when the server starts
@@ -68,8 +74,6 @@ def get_catalog():
     #return json.dumps(mock_data)
     return json.dumps(results)
 
-
-#--------------A POST REQUEST----------------
 @app.post("/api/catalog")
 def save_product():
     #get the json payload from the request
@@ -90,7 +94,8 @@ def save_product():
 
 @app.get("/api/products/count")
 def products_count():
-    return json.dumps(len(mock_data))
+    count = db.products.count_documents({})
+    return json.dumps(count)
 
 #class 4
 #1. get /api/products/total
@@ -98,8 +103,9 @@ def products_count():
 @app.get("/api/products/total")
 def products_total():
     total = 0
-    for product in mock_data:
-        total = total + float(product["price"])
+    cursor = db.products.find({})
+    for prod in cursor:
+        total = total + float(prod["price"])
     return json.dumps(total)
 
 #2.  get /api/categories
@@ -149,26 +155,27 @@ def products_by_category(category):
 # should return all the products whose price is lower than price var
 @app.get("/api/products/lower/<price>")
 def products_lower_price(price):
+    cursor = db.products.find({})
     fixed_price = float(price)
     results = []
 
-    for prod in mock_data:
+    for prod in cursor:
         if prod["price"] < fixed_price:
-            results.append(prod)
+            results.append(fix_id(prod))
     
     return json.dumps(results)
 
 #5. get /api/products/greater/<price>
 # prices geater OR EQUAL 
-
 @app.get("/api/products/geater/<price>")
 def producst_geater_price(price):
+    cursor = db.products.find({})
     fixed_price = float(price)
     results = []
 
-    for prod in mock_data:
+    for prod in cursor:
         if prod["price"] >= fixed_price:
-            results.append(prod)
+            results.append(fix_id(prod))
     
     return json.dumps(results)
 
@@ -182,13 +189,14 @@ def producst_geater_price(price):
 
 @app.get("/api/products/search/<term>")
 def products_search(term):
-    result = []
 
-    for prod in mock_data:
-        if term.lower() in prod["title"].lower():
-            result.append(prod)
+    # search 
+    cursor = db.products.find({"title": {'$regex': term, "$options": "i"}})
+    results = []
+    for prod in cursor:
+        results.append(fix_id(prod))
     
-    return json.dumps(result)
+    return json.dumps(results)
 
 def fix_id(record):
     #Read the id to remove the _ of id.
@@ -223,6 +231,18 @@ def get_coupon():
         results.append(fix_id(coupon))
 
     return json.dumps(results)
+
+#GET /api/<coupon>
+@app.get("/api/coupons/<code>")
+def coupone_by_code(code):
+    #Get just one object and not the entire list
+    coupon = db.coupons.find_one({"code": code})
+    if coupon == None:
+        return abort(404, "Invalid coupon code.")
+        
+    return json.dumps(fix_id(coupon))
+
+
 
 #Start the server
 app.run(debug=True) #debug = True get details about an error,
